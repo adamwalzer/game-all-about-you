@@ -1,0 +1,2838 @@
+@import 'variables';
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body,
+body > div,
+body > div > div {
+    margin: 0;
+    cursor: auto;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    user-select: none;
+    user-drag: none;
+}
+
+html {
+    font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, sans-serif;
+}
+
+body > div > div {
+    position: relative;
+    margin: auto;
+    background: url('#{$image}bkg-1-01.png') bottom center no-repeat;
+    background-size: cover;
+    width: 960px;
+    height: 540px;
+    color: $white;
+    font-size: 36px;
+}
+
+button {
+    margin: 0;
+    outline: none;
+    border: 0;
+
+    background-color: transparent;
+    background-image: url('#{$sprite}sprite-sheet-hover-buttons.png');
+    background-position: left top;
+    background-size: auto 200px;
+
+    cursor: pointer;
+    padding: 0;
+    color: transparent;
+    font-family: inherit;
+    font-size: inherit;
+
+    &.close {
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 2;
+        margin: 10px;
+        background-position: 162px 100px;
+        width: 40px;
+        height: 40px;
+
+        &:hover {
+            background-position: 162px 0;
+        }
+    }
+
+    &.next-screen,
+    &.prev-screen {
+        width: 55px;
+        height: 55px;
+    }
+
+    &.next-screen {
+        background-position: -152px 305px;
+
+        &:hover {
+            background-position: -152px 205px;
+        }
+    }
+
+    &.prev-screen {
+        background-position: 5px 305px;
+
+        &:hover {
+            background-position: 5px 204px;
+        }
+    }
+
+    &.close-reveal {
+        background-position: -225px 420px;
+        width: 55px;
+        height: 50px;
+
+        &.ENABLED:hover {
+            background-position: -225px 676px;
+        }
+    }
+
+    &.quit-yes {
+        background-position: -1830px 495px;
+        width: 230px;
+        height: 230px;
+
+        &:hover {
+            background-position: -1830px 251px;
+        }
+    }
+
+    &.quit-no {
+        background-position: -2080px 495px;
+        width: 230px;
+        height: 230px;
+
+        &:hover {
+            background-position: -2080px 251px;
+        }
+    }
+}
+
+body.DEMO .reveal-component .items li div .close-reveal {
+    opacity: 1;
+    cursor: pointer;
+
+    &:hover {
+        background-position: -225px 676px;
+    }
+}
+
+h2 {
+    font-size: 40px;
+}
+
+h3 {
+    margin: 0;
+    font-size: 30px;
+}
+
+p {
+    margin: 0;
+    font-size: 28px;
+}
+
+// preload game assets
+#asset-bin {
+    display: none;
+}
+
+.canvas-src { display: none; }
+
+.screen {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateX(100%);
+    transition: opacity 1s, transform .5s;
+    opacity: 0;
+    margin-top: -270px;
+    width: 960px;
+    height: 540px;
+
+    &:not(.COMPLETE) {
+        button {
+            &.next-screen {
+                cursor: auto;
+            }
+        }
+    }
+}
+
+.screen.OPEN {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.screen.READY {
+    display: block;
+}
+
+.screen.LEAVE {
+    transform: translateX(-100%);
+    opacity: 0;
+}
+
+.screen .next-screen,
+.screen .prev-screen {
+    position: absolute;
+    bottom: 1%;
+    visibility: visible;
+    z-index: 2;
+}
+
+.screen .next-screen {
+    right: 0;
+    transform: rotate(-180deg);
+    transition: visibility 1s, opacity 1s, transform 1s;
+    visibility: hidden;
+    opacity: 0;
+    margin-right: 5px;
+}
+
+.screen.GATED .next-screen {
+    visibility: hidden;
+    opacity: 0;
+    z-index: -1;
+    cursor: auto;
+}
+
+.pl-game.DEMO .screen .next-screen,
+.screen.COMPLETE .next-screen {
+    transform: rotate(0deg);
+    visibility: visible;
+    opacity: 1;
+    z-index: 1;
+    cursor: pointer;
+}
+
+.pl-game.MENU.MENU-quit .menu .close {
+    visibility: hidden;
+}
+
+.screen .prev-screen {
+    left: 0;
+    margin-left: 5px;
+}
+
+// the following css is specific to this game
+
+ul {
+    list-style-type: none;
+}
+
+
+.reveal {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition: opacity .5s, z-index 0s .6s;
+    opacity: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+
+    div {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        margin-top: -120px;
+        background-size: 100% 100%;
+        width: 100%;
+        height: 240px;
+    }
+
+    ul {
+        margin: 0;
+        height: 100%;
+
+        li {
+            margin: 0;
+            height: 100%;
+
+            p {
+                display: block;
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 100%;
+                text-align: center;
+                color: $black;
+            }
+
+        }
+    }
+
+    .close-reveal {
+        position: absolute;
+        right: 5px;
+        bottom: 10px;
+        transition: opacity 1s;
+        opacity: 1;
+        cursor: pointer;
+    }
+
+    &.OPEN {
+        transition: opacity .5s;
+        opacity: 1;
+        z-index: 1;
+    }
+}
+
+.VOICE-OVER {
+    .draggable,
+    .selectable > * {
+        pointer-events: none;
+    }
+}
+
+.VOICE-OVER:not(.DEMO) * {
+    pointer-events: none;
+}
+
+.video {
+    background: url('#{$frame}fr-2.png') center center no-repeat;
+    background-size: 100% 100%;
+
+    video {
+        margin: 15px 15px 34px;
+    }
+}
+
+#title {
+    img {
+        position: absolute;
+
+        &.ice-cube {
+            width: 101%;
+        }
+
+        &.penguine-1 {
+            bottom: 0;
+            left: 0;
+            width: 26%;
+        }
+
+        &.penguine-2 {
+            top: 3%;
+            right: 3%;
+            width: 35%;
+        }
+
+        &.magnifying-glass {
+            left: 0;
+            width: 38%;
+        }
+
+        &.title {
+            top: 2%;
+            left: 130px;
+            width: 700px;
+        }
+    }
+
+    button {
+        &.next-screen {
+            bottom: 1%;
+            background-position: 324px 312px;
+            width: 160px;
+            height: 100px;
+
+            &:hover {
+                background-position: 324px 212px;
+            }
+        }
+
+        &.prev-screen {
+            display: none;
+        }
+    }
+
+    &.READY {
+        img {
+            opacity: 1;
+
+            &.penguine-2,
+            &.magnifying-glass,
+            &.penguine-1 {
+                animation-name: slideInDown;
+            }
+
+            &.title {
+                animation-name: bounceInDown;
+            }
+
+        }
+
+        &.COMPLETE {
+            img {
+                &.title {
+                    animation-name: tada;
+                }
+            }
+        }
+    }
+
+    &.CLOSE {
+        transform: translateX(0%);
+    }
+}
+
+#info {
+    img {
+        position: absolute;
+
+        &.penguin-megaphone {
+            bottom: 16%;
+            left: 0;
+            width: 20%;
+        }
+
+        &.spotlight {
+            top: 0;
+            right: 10%;
+            width: 50%;
+        }
+
+        &.speech-bubble,
+        &.you {
+            transform: scale(0);
+            transition: transform .5s ease-in-out;
+        }
+
+        &.speech-bubble {
+            top: 15%;
+            left: 14%;
+            width: 35%;
+        }
+
+        &.you {
+            right: 15%;
+            bottom: 20%;
+            opacity: 0;
+            width: 40%;
+        }
+    }
+
+
+
+    &.READY.OPEN {
+        img {
+            &.speech-bubble {
+                transform: scale(1);
+                transform-origin: 0 100%;
+                transition-delay: .5s;
+            }
+
+            &.you {
+                animation-name: bounceInDown;
+                animation-delay: 3.25s;
+                opacity: 1;
+            }
+        }
+
+        &.COMPLETE {
+            img {
+                &.you {
+                    animation-name: tada;
+                    animation-delay: .1s;
+                    z-index: 1;
+                }
+            }
+        }
+    }
+
+}
+
+#drag-n-drop-passionate {
+    &.READY.OPEN {
+        img,
+        .meter,
+        .frame {
+            position: absolute;
+
+            &.banner {
+                top: 2%;
+                left: 9%;
+                width: 80%;
+            }
+
+            &.penguin {
+                top: 4%;
+                left: 0;
+                width: 18%;
+            }
+        }
+
+        .frame {
+            bottom: 12%;
+            left: 11%;
+            background: url('#{$frame}frame-11-grey-rectangle.png');
+            background-size: 100% 100%;
+            width: 45%;
+            height: 69%;
+        }
+
+        ul > * {
+            display: inline-block;
+            position: absolute;
+            background: url('#{$sprite}spritesheet-frame3-leftbuttons-01.png');
+            background-size: 1015px 394px;
+            width: 13%;
+            height: 22%;
+
+            &:nth-child(1) {
+                top: 22%;
+                left: 13%;
+                background-position: 633px 117px;
+            }
+
+            &:nth-child(2) {
+                top: 22%;
+                left: 27%;
+                background-position: 506px 117px;
+            }
+
+            &:nth-child(3) {
+                top: 22%;
+                left: 41%;
+                background-position: 253px 117px;
+            }
+
+            &:nth-child(4) {
+                top: 44%;
+                left: 13%;
+                background-position: 380px 117px;
+            }
+
+            &:nth-child(5) {
+                top: 44%;
+                left: 27%;
+                background-position: -1px 117px;
+            }
+
+            &:nth-child(6) {
+                top: 44%;
+                left: 41%;
+                background-position: 759px 117px;
+            }
+
+            &:nth-child(7) {
+                top: 66%;
+                left: 19.5%;
+                background-position: 127px 117px;
+            }
+
+            &:nth-child(8) {
+                top: 66%;
+                left: 33.5%;
+                background-position: 887px 117px;
+            }
+        }
+
+        .draggable-list-item {
+            position: absolute;
+            top: 25%;
+            left: 25%;
+            width: 50%;
+            height: 50%;
+
+            &::before {
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                background: url('#{$sprite}spritesheet-frame3-leftbuttons-01.png');
+                background-size: 1060px 411px;
+                width: 200%;
+                height: 200%;
+                content: '';
+            }
+
+            &.friends {
+                &::before {
+                    background-position: 658px -12px;
+                }
+            }
+
+            &.world-peace {
+                &::before {
+                    background-position: 526px -12px;
+                }
+            }
+
+            &.sports {
+                &::before {
+                    background-position: 261px -12px;
+                }
+            }
+
+            &.playing-games {
+                &::before {
+                    background-position: 395px -12px;
+                }
+            }
+
+            &.looking-cool {
+                &::before {
+                    background-position: -3px -12px;
+                }
+            }
+
+            &.school {
+                &::before {
+                    background-position: 790px -12px;
+                }
+            }
+
+            &.celebrities {
+                &::before {
+                    background-position: 131px -12px;
+                }
+            }
+
+            &.environment {
+                &::before {
+                    background-position: 923px -12px;
+                }
+            }
+
+            &.DRAGGING {
+                z-index: 1;
+
+                &::before {
+                    background-size: 1000px 388px;
+                }
+
+                &.friends {
+                    &::before {
+                        background-position: 625px 245px;
+                    }
+                }
+
+                &.world-peace {
+                    &::before {
+                        background-position: 499px 244px;
+                    }
+                }
+
+                &.sports {
+                    &::before {
+                        background-position: 250px 245px;
+                    }
+                }
+
+                &.playing-games {
+                    &::before {
+                        background-position: 375px 245px;
+                    }
+                }
+
+                &.looking-cool {
+                    &::before {
+                        background-position: 0 244px;
+                    }
+                }
+
+                &.school {
+                    &::before {
+                        background-position: 749px 245px;
+                    }
+                }
+
+                &.celebrities {
+                    &::before {
+                        background-position: 125px 244px;
+                    }
+                }
+
+                &.environment {
+                    &::before {
+                        background-position: 874px 244px;
+                    }
+                }
+            }
+
+            &.CORRECT {
+                &::before {
+                    background: url('#{$sprite}spritesheet-frame3-passion.png');
+                    background-size: 1000px 141px;
+                }
+
+                &.friends {
+                    &::before {
+                        background-position: 132px -12px;
+                    }
+                }
+
+                &.world-peace {
+                    &::before {
+                        background-position: 254px -12px;
+                    }
+                }
+
+                &.sports {
+                    &::before {
+                        background-position: 376px -12px;
+                    }
+                }
+
+                &.playing-games {
+                    &::before {
+                        background-position: 497px -12px;
+                    }
+                }
+
+                &.looking-cool {
+                    &::before {
+                        background-position: 620px -11px;
+                    }
+                }
+
+                &.school {
+                    &::before {
+                        background-position: 746px -12px;
+                    }
+                }
+
+                &.celebrities {
+                    &::before {
+                        background-position: 863px -12px;
+                    }
+                }
+
+                &.environment {
+                    &::before {
+                        background-position: 988px -10px;
+                    }
+                }
+            }
+        }
+
+        div {
+            .dropzone {
+                position: absolute;
+                background: url('#{$sprite}spritesheet-right-numbers-01.png');
+                background-size: 1150px 130px;
+                width: 13%;
+                height: 22%;
+
+                &:nth-child(1) {
+                    top: 22%;
+                    left: 57%;
+                    background-position: -13px -6px;
+                }
+
+                &:nth-child(2) {
+                    top: 22%;
+                    left: 70%;
+                    background-position: 992px -5px;
+                }
+
+                &:nth-child(3) {
+                    top: 22%;
+                    left: 83%;
+                    background-position: 849px -6px;
+                }
+
+                &:nth-child(4) {
+                    top: 44%;
+                    left: 57%;
+                    background-position: 705px -5px;
+                }
+
+                &:nth-child(5) {
+                    top: 44%;
+                    left: 70%;
+                    background-position: 562px -7px;
+                }
+
+                &:nth-child(6) {
+                    top: 44%;
+                    left: 83%;
+                    background-position: 420px -5px;
+                }
+
+                &:nth-child(7) {
+                    top: 66%;
+                    left: 62%;
+                    background-position: 273px -8px;
+                }
+
+                &:nth-child(8) {
+                    top: 66%;
+                    left: 75%;
+                    background-position: 133px -6px;
+                }
+            }
+        }
+
+        .meter {
+            bottom: -5%;
+            left: 25%;
+            background: url('#{$sprite}spritesheet-progressionmeter-01.png');
+            background-position: 0 130px;
+            background-size: cover;
+            width: 50%;
+            height: 25%;
+        }
+    }
+}
+
+#drag-n-drop-issues {
+    &.READY.OPEN {
+        img,
+        .meter,
+        .frame {
+            position: absolute;
+
+            &.banner {
+                top: 2%;
+                left: 9%;
+                width: 80%;
+            }
+
+            &.penguin {
+                top: 0;
+                left: 0;
+                width: 15%;
+            }
+        }
+
+        .frame {
+            bottom: 12%;
+            left: 11%;
+            background: url('#{$frame}frame-11-grey-rectangle.png');
+            background-size: 100% 100%;
+            width: 45%;
+            height: 69%;
+        }
+
+        ul > * {
+            display: inline-block;
+            position: absolute;
+            background: url('#{$sprite}spritesheet-frame4-leftbuttons-01-01.png');
+            background-size: 1015px 394px;
+            width: 13%;
+            height: 22%;
+
+            &:nth-child(1) {
+                top: 22%;
+                left: 13%;
+                background-position: -2px 117px;
+            }
+
+            &:nth-child(2) {
+                top: 22%;
+                left: 27%;
+                background-position: 886px 117px;
+            }
+
+            &:nth-child(3) {
+                top: 22%;
+                left: 41%;
+                background-position: 759px 117px;
+            }
+
+            &:nth-child(4) {
+                top: 44%;
+                left: 13%;
+                background-position: 634px 118px;
+            }
+
+            &:nth-child(5) {
+                top: 44%;
+                left: 27%;
+                background-position: 506px 119px;
+            }
+
+            &:nth-child(6) {
+                top: 44%;
+                left: 41%;
+                background-position: 379px 119px;
+            }
+
+            &:nth-child(7) {
+                top: 66%;
+                left: 19.5%;
+                background-position: 253px 119px;
+            }
+
+            &:nth-child(8) {
+                top: 66%;
+                left: 33.5%;
+                background-position: 125px 121px;
+            }
+        }
+
+        .draggable-list-item {
+            position: absolute;
+            top: 25%;
+            left: 25%;
+            width: 50%;
+            height: 50%;
+
+            &::before {
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                background: url('#{$sprite}spritesheet-frame4-leftbuttons-01-01.png');
+                background-size: 1060px 411px;
+                width: 200%;
+                height: 200%;
+                content: '';
+            }
+
+            &.cyberbullying {
+                &::before {
+                    background-position: -2px -12px;
+                }
+            }
+
+            &.endangered-animals {
+                &::before {
+                    background-position: 926px -12px;
+                }
+            }
+
+            &.literacy {
+                &::before {
+                    background-position: 794px -12px;
+                }
+            }
+
+            &.climate-change {
+                &::before {
+                    background-position: 662px -12px;
+                }
+            }
+
+            &.poverty {
+                &::before {
+                    background-position: 530px -12px;
+                }
+            }
+
+            &.health-problems {
+                &::before {
+                    background-position: 395px -12px;
+                }
+            }
+
+            &.homelessness {
+                &::before {
+                    background-position: 264px -12px;
+                }
+            }
+
+            &.safety {
+                &::before {
+                    background-position: 132px -15px;
+                }
+            }
+
+            &.DRAGGING {
+                z-index: 1;
+
+                &::before {
+                    background-size: 995px 386px;
+                }
+
+                &.cyberbullying {
+                    &::before {
+                        background-position: 0 243px;
+                    }
+                }
+
+                &.endangered-animals {
+                    &::before {
+                        background-position: 871px 243px;
+                    }
+                }
+
+                &.literacy {
+                    &::before {
+                        background-position: 747px 243px;
+                    }
+                }
+
+                &.climate-change {
+                    &::before {
+                        background-position: 622px 243px;
+                    }
+                }
+
+                &.poverty {
+                    &::before {
+                        background-position: 498px 243px;
+                    }
+                }
+
+                &.health-problems {
+                    &::before {
+                        background-position: 373px 243px;
+                    }
+                }
+
+                &.homelessness {
+                    &::before {
+                        background-position: 249px 242px;
+                    }
+                }
+
+                &.safety {
+                    &::before {
+                        background-position: 124px 244px;
+                    }
+                }
+            }
+
+            &.CORRECT {
+                &::before {
+                    background: url('#{$sprite}spritesheet-frame3-worldissues-01.png');
+                    background-size: 1000px 141px;
+                }
+
+                &.cyberbullying {
+                    &::before {
+                        background-position: -2px -8px;
+                    }
+                }
+
+                &.endangered-animals {
+                    &::before {
+                        background-position: 869px -7px;
+                    }
+                }
+
+                &.literacy {
+                    &::before {
+                        background-position: 751px -10px;
+                    }
+                }
+
+                &.climate-change {
+                    &::before {
+                        background-position: 625px -14px;
+                    }
+                }
+
+                &.poverty {
+                    &::before {
+                        background-position: 495px -10px;
+                    }
+                }
+
+                &.health-problems {
+                    &::before {
+                        background-position: 374px -14px;
+                    }
+                }
+
+                &.homelessness {
+                    &::before {
+                        background-position: 247px -8px;
+                    }
+                }
+
+                &.safety {
+                    &::before {
+                        background-position: 127px -9px;
+                    }
+                }
+            }
+        }
+
+        div {
+            .dropzone {
+                position: absolute;
+                background: url('#{$sprite}spritesheet-right-numbers-01.png');
+                background-size: 1150px 130px;
+                width: 13%;
+                height: 22%;
+
+                &:nth-child(1) {
+                    top: 22%;
+                    left: 57%;
+                    background-position: -13px -6px;
+                }
+
+                &:nth-child(2) {
+                    top: 22%;
+                    left: 70%;
+                    background-position: 996px -6px;
+                }
+
+                &:nth-child(3) {
+                    top: 22%;
+                    left: 83%;
+                    background-position: 852px -6px;
+                }
+
+                &:nth-child(4) {
+                    top: 44%;
+                    left: 57%;
+                    background-position: 708px -6px;
+                }
+
+                &:nth-child(5) {
+                    top: 44%;
+                    left: 70%;
+                    background-position: 562px -6px;
+                }
+
+                &:nth-child(6) {
+                    top: 44%;
+                    left: 83%;
+                    background-position: 421px -6px;
+                }
+
+                &:nth-child(7) {
+                    top: 66%;
+                    left: 62%;
+                    background-position: 276px -6px;
+                }
+
+                &:nth-child(8) {
+                    top: 66%;
+                    left: 75%;
+                    background-position: 135px -6px;
+                }
+            }
+        }
+
+        .meter {
+            bottom: -5%;
+            left: 25%;
+            background: url('#{$sprite}spritesheet-progressionmeter-01.png');
+            background-position: 0 252px;
+            background-size: cover;
+            width: 50%;
+            height: 25%;
+        }
+    }
+}
+
+#pick-one-powerful {
+    &.READY.OPEN {
+        img,
+        .meter {
+            position: absolute;
+
+            &.banner {
+                top: 9%;
+                left: 3%;
+                width: 94%;
+            }
+        }
+
+        ul.selectable > * {
+            display: inline-block;
+            position: absolute;
+            background: url('#{$sprite}srn5spritesheets-frame5-emotions.png');
+            background-size: 1250px 625px;
+            width: 200px;
+            height: 200px;
+
+            &:nth-child(1) {
+                top: 41%;
+                left: 5%;
+                background-position: -58px -58px;
+
+                &:hover,
+                &:active,
+                &:focus,
+                &.SELECTED {
+                    background-position: -58px 250px;
+                }
+            }
+
+            &:nth-child(2) {
+                top: 41%;
+                left: 28%;
+                background-position: 881px -58px;
+
+                &:hover,
+                &:active,
+                &:focus,
+                &.SELECTED {
+                    background-position: 881px 250px;
+
+                }
+            }
+
+            &:nth-child(3) {
+                top: 41%;
+                right: 28%;
+                background-position: 563px -58px;
+
+                &:hover,
+                &:active,
+                &:focus,
+                &.SELECTED {
+                    background-position: 563px 257px;
+                }
+            }
+
+            &:nth-child(4) {
+                top: 41%;
+                right: 5%;
+                background-position: 257px -58px;
+
+                &:hover,
+                &:active,
+                &:focus,
+                &.SELECTED {
+                    background-position: 256px 254px;
+                }
+            }
+        }
+
+        .meter {
+            bottom: -5%;
+            left: 25%;
+            background: url('#{$sprite}spritesheet-progressionmeter-01.png');
+            background-position: 0 374px;
+            background-size: cover;
+            width: 50%;
+            height: 25%;
+        }
+    }
+}
+
+#qualities-buckets {
+    &.READY.OPEN {
+        img,
+        .meter,
+        .frame {
+            position: absolute;
+
+            &.penguin {
+                top: 4%;
+                left: 2%;
+                width: 27%;
+            }
+        }
+
+        .frame {
+            bottom: 14%;
+            left: 23%;
+            background: url('#{$frame}mostpowerfulleastpowerful-01.png');
+            background-size: 100% 100%;
+            width: 70%;
+            height: 85%;
+        }
+
+        .draggable-list-item {
+            position: absolute;
+            width: 4%;
+            height: 8%;
+
+            &::before {
+                position: absolute;
+                top: -115%;
+                left: -150%;
+                background: url('#{$sprite}spritesheet-frame6-01.png');
+                background-size: 1200px 300px;
+                width: 375%;
+                height: 335%;
+                content: '';
+            }
+
+            &.CORRECT {
+                display: none;
+            }
+
+            &.sharing {
+                top: 15%;
+                left: 35%;
+
+                &::before {
+                    background-position: -8px -11px;
+                }
+            }
+
+            &.kindness {
+                top: 15%;
+                left: 50%;
+
+                &::before {
+                    background-position: -151px -11px;
+                }
+            }
+
+            &.rudeness {
+                top: 15%;
+                left: 65%;
+
+                &::before {
+                    background-position: 901px -11px;
+                }
+            }
+
+            &.being-a-bully {
+                top: 15%;
+                left: 80%;
+
+                &::before {
+                    background-position: 744px -11px;
+                }
+            }
+
+            &.compassion {
+                top: 42%;
+                left: 35%;
+
+                &::before {
+                    background-position: 597px 1px;
+                }
+            }
+
+            &.greediness {
+                top: 42%;
+                left: 50%;
+
+                &::before {
+                    background-position: 448px 2px;
+                }
+            }
+
+            &.being-angry {
+                top: 42%;
+                left: 65%;
+
+                &::before {
+                    background-position: 299px -5px;
+                }
+            }
+
+            &.friendliness {
+                top: 42%;
+                left: 80%;
+
+                &::before {
+                    background-position: 142px -2px;
+                }
+            }
+
+            &.DRAGGING {
+                z-index: 1;
+
+                &.sharing {
+                    &::before {
+                        background-position: -2px 136px;
+                    }
+                }
+
+                &.kindness {
+                    &::before {
+                        background-position: -154px 138px;
+                    }
+                }
+
+                &.rudeness {
+                    &::before {
+                        background-position: 901px 136px;
+                    }
+                }
+
+                &.being-a-bully {
+                    &::before {
+                        background-position: 742px 136px;
+                    }
+                }
+
+                &.compassion {
+                    &::before {
+                        background-position: 598px 149px;
+                    }
+                }
+
+                &.greediness {
+                    &::before {
+                        background-position: 449px 153px;
+                    }
+                }
+
+                &.being-angry {
+                    &::before {
+                        background-position: 296px 145px;
+                    }
+                }
+
+                &.friendliness {
+                    &::before {
+                        background-position: 140px 148px;
+                    }
+                }
+            }
+        }
+
+        div {
+            .dropzone {
+                position: absolute;
+                background: url('#{$sprite}spritesheet-frame6-bucket.png');
+                background-size: 600px 392px;
+                width: 15%;
+                height: 25%;
+
+                &:nth-child(1) {
+                    bottom: 10%;
+                    left: 37%;
+                    background-position: -74px -48px;
+
+                    &:hover,
+                    &:focus {
+                        background-position: -72px 146px;
+                    }
+                }
+
+                &:nth-child(2) {
+                    bottom: 10%;
+                    left: 66%;
+                    background-position: 811px -48px;
+
+                    &:hover,
+                    &:focus {
+                        background-position: 814px 146px;
+                    }
+                }
+            }
+        }
+
+        .meter {
+            bottom: -5%;
+            left: 25%;
+            background: url('#{$sprite}spritesheet-progressionmeter-01.png');
+            background-position: 0 1729px;
+            background-size: cover;
+            width: 50%;
+            height: 25%;
+        }
+    }
+}
+
+#emoji-bullying {
+    background: url('#{$image}bkg-2.png') bottom center no-repeat;
+    background-size: cover;
+
+    &.READY.OPEN {
+        img,
+        .meter,
+        .frame,
+        .sub-frame {
+            position: absolute;
+
+            &.penguins {
+                top: 3%;
+                left: 2%;
+                width: 40%;
+            }
+
+            &.penguins-bullying {
+                top: 13%;
+                right: 13%;
+                width: 38%;
+            }
+        }
+
+        .frame {
+            top: 3%;
+            right: 6%;
+            background: url('#{$frame}img-s7-bigger-frame.png');
+            background-size: 100% 100%;
+            width: 53%;
+            height: 81%;
+        }
+
+        .sub-frame {
+            top: 7%;
+            right: 9%;
+            background: url('#{$frame}img-s7-smaller-frame.png');
+            background-size: 100% 100%;
+            width: 47%;
+            height: 45%;
+        }
+
+        ul.selectable > * {
+            display: inline-block;
+            position: absolute;
+            animation-name: fadeIn;
+            animation-delay: 7s;
+            background: url('#{$sprite}spritesheet-frame07-polar-bear.png');
+            background-size: 440px 270px;
+            width: 143px;
+            height: 133px;
+
+            &:nth-child(1) {
+                bottom: 22%;
+                left: 45%;
+                background-position: -6px 129px;
+
+                &:hover,
+                &:active,
+                &:focus,
+                &.SELECTED {
+                    background-position: -7px 265px;
+                }
+            }
+
+            &:nth-child(2) {
+                bottom: 22%;
+                left: 60%;
+                background-position: 289px 130px;
+
+                &:hover,
+                &:active,
+                &:focus,
+                &.SELECTED {
+                    background-position: 288px 265px;
+
+                }
+            }
+
+            &:nth-child(3) {
+                bottom: 22%;
+                left: 75%;
+                background-position: 584px 129px;
+
+                &:hover,
+                &:active,
+                &:focus,
+                &.SELECTED {
+                    background-position: 585px 266px;
+                }
+            }
+        }
+    }
+
+    .meter {
+        bottom: -5%;
+        left: 25%;
+        background: url('#{$sprite}spritesheet-progressionmeter-01.png');
+        background-position: 0 496px;
+        background-size: cover;
+        width: 50%;
+        height: 25%;
+    }
+}
+
+#emoji-compassion {
+    background: url('#{$image}bkg-2.png') bottom center no-repeat;
+    background-size: cover;
+
+    &.READY.OPEN {
+        img,
+        .meter,
+        .frame,
+        .sub-frame {
+            position: absolute;
+
+            &.penguins {
+                top: 3%;
+                left: 2%;
+                width: 40%;
+            }
+
+            &.penguins-compassion {
+                top: -3%;
+                right: 15%;
+                width: 35%;
+            }
+        }
+
+        .frame {
+            top: 3%;
+            right: 6%;
+            background: url('#{$frame}img-s8-bigger-frame.png');
+            background-size: 100% 100%;
+            width: 53%;
+            height: 81%;
+        }
+
+        .sub-frame {
+            top: 7%;
+            right: 9%;
+            background: url('#{$frame}img-s8-smaller-frame.png');
+            background-size: 100% 100%;
+            width: 47%;
+            height: 43%;
+        }
+
+        ul.selectable > * {
+            display: inline-block;
+            position: absolute;
+            animation-name: fadeIn;
+            animation-delay: 7s;
+            background: url('#{$sprite}spritesheet-emotions.png');
+            background-size: 1350px 280px;
+            width: 142px;
+            height: 133px;
+
+            &:nth-child(1) {
+                bottom: 22%;
+                left: 45%;
+                background-position: 444px -4px;
+
+                &:hover,
+                &:active,
+                &:focus,
+                &.SELECTED {
+                    background-position: 445px 134px;
+                }
+            }
+
+            &:nth-child(2) {
+                bottom: 22%;
+                left: 60%;
+                background-position: 145px -4px;
+
+                &:hover,
+                &:active,
+                &:focus,
+                &.SELECTED {
+                    background-position: 145px 137px;
+
+                }
+            }
+
+            &:nth-child(3) {
+                bottom: 22%;
+                left: 75%;
+                background-position: 894px -5px;
+
+                &:hover,
+                &:active,
+                &:focus,
+                &.SELECTED {
+                    background-position: 896px 136px;
+                }
+            }
+        }
+
+        .meter {
+            bottom: -5%;
+            left: 25%;
+            background: url('#{$sprite}spritesheet-progressionmeter-01.png');
+            background-position: 0 616px;
+            background-size: cover;
+            width: 50%;
+            height: 25%;
+        }
+    }
+}
+
+#emoji-angry {
+    background: url('#{$image}bkg-2.png') bottom center no-repeat;
+    background-size: cover;
+
+    &.READY.OPEN {
+        img,
+        .meter,
+        .frame,
+        .sub-frame {
+            position: absolute;
+
+            &.penguins {
+                top: 22%;
+                left: 2%;
+                width: 40%;
+            }
+
+            &.banner {
+                top: 2%;
+                left: 2%;
+                width: 38%;
+            }
+
+            &.penguins-angry {
+                top: 2%;
+                right: 24%;
+                width: 22%;
+            }
+
+            &.text-angry {
+                top: 44%;
+                right: 20%;
+                width: 25%;
+            }
+        }
+
+        .frame {
+            top: 3%;
+            right: 6%;
+            background: url('#{$frame}frame-09-grey-rectangle.png');
+            background-size: 100% 100%;
+            width: 53%;
+            height: 81%;
+        }
+
+        ul.selectable > * {
+            display: inline-block;
+            position: absolute;
+            animation-name: fadeIn;
+            animation-delay: 6s;
+            background: url('#{$sprite}img-09-polar-bears-sprite-sheet-02.png');
+            background-size: 440px 270px;
+            width: 143px;
+            height: 133px;
+
+            &:nth-child(1) {
+                bottom: 19%;
+                left: 45%;
+                background-position: -12px 129px;
+
+                &:hover,
+                &:active,
+                &:focus,
+                &.SELECTED {
+                    background-position: -12px 264px;
+                }
+            }
+
+            &:nth-child(2) {
+                bottom: 19%;
+                left: 60%;
+                background-position: 283px 130px;
+
+                &:hover,
+                &:active,
+                &:focus,
+                &.SELECTED {
+                    background-position: 282px 264px;
+
+                }
+            }
+
+            &:nth-child(3) {
+                bottom: 19%;
+                left: 75%;
+                background-position: 578px 132px;
+
+                &:hover,
+                &:active,
+                &:focus,
+                &.SELECTED {
+                    background-position: 579px 268px;
+                }
+            }
+        }
+
+        .meter {
+            bottom: -5%;
+            left: 25%;
+            background: url('#{$sprite}spritesheet-progressionmeter-01.png');
+            background-position: 0 738px;
+            background-size: cover;
+            width: 50%;
+            height: 25%;
+        }
+    }
+}
+
+
+#emoji-friendliness {
+    background: url('#{$image}bkg-2.png') bottom center no-repeat;
+    background-size: cover;
+
+    &.READY.OPEN {
+        img,
+        .meter,
+        .frame,
+        .sub-frame {
+            position: absolute;
+
+            &.penguins {
+                top: 22%;
+                left: 2%;
+                width: 40%;
+            }
+
+            &.banner {
+                top: 1%;
+                left: 1%;
+                width: 41%;
+            }
+
+            &.penguins-friendly {
+                top: 7%;
+                right: 13%;
+                width: 37%;
+            }
+
+            &.text-friendly {
+                top: 44%;
+                right: 20%;
+                width: 25%;
+            }
+        }
+
+        .frame {
+            top: 3%;
+            right: 6%;
+            background: url('#{$frame}frame-09-grey-rectangle.png');
+            background-size: 100% 100%;
+            width: 53%;
+            height: 81%;
+        }
+
+        ul.selectable > * {
+            display: inline-block;
+            position: absolute;
+            animation-name: fadeIn;
+            animation-delay: 6s;
+            background: url('#{$sprite}img-10-polarbear-sprite-sheet-02.png');
+            background-size: 440px 270px;
+            width: 135px;
+            height: 132px;
+
+            &:nth-child(1) {
+                bottom: 19%;
+                left: 45%;
+                background-position: -16px 129px;
+
+                &:hover,
+                &:active,
+                &:focus,
+                &.SELECTED {
+                    background-position: -17px 267px;
+                }
+            }
+
+            &:nth-child(2) {
+                bottom: 19%;
+                left: 60%;
+                background-position: 283px 132px;
+
+                &:hover,
+                &:active,
+                &:focus,
+                &.SELECTED {
+                    background-position: 281px 266px;
+
+                }
+            }
+
+            &:nth-child(3) {
+                bottom: 19%;
+                left: 75%;
+                background-position: 578px 134px;
+
+                &:hover,
+                &:active,
+                &:focus,
+                &.SELECTED {
+                    background-position: 577px 269px;
+                }
+            }
+        }
+
+        .meter {
+            bottom: -5%;
+            left: 25%;
+            background: url('#{$sprite}spritesheet-progressionmeter-01.png');
+            background-position: 0 862px;
+            background-size: cover;
+            width: 50%;
+            height: 25%;
+        }
+    }
+}
+
+#pick-one-bullied {
+    &.READY.OPEN {
+        img,
+        .frame,
+        .meter {
+            position: absolute;
+
+            &.penguin {
+                top: 28%;
+                left: 2%;
+                width: 32%;
+            }
+
+            &.banner {
+                top: 3%;
+                left: 1%;
+                width: 52%;
+            }
+        }
+
+        .frame {
+            top: 34%;
+            right: 15%;
+            background: url('#{$frame}frame-11-grey-rectangle.png');
+            background-size: 100% 100%;
+            width: 47%;
+            height: 47%;
+        }
+
+        ul.selectable > * {
+            display: inline-block;
+            position: absolute;
+            background: url('#{$sprite}spritesheet-frame11-yes-or-no-01.png');
+            background-size: 400px 344px;
+            width: 181px;
+            height: 166px;
+
+            &:nth-child(1) {
+                top: 42%;
+                left: 41%;
+                background-position: -11px 172px;
+
+                &:hover,
+                &:active,
+                &:focus,
+                &.SELECTED {
+                    background-position: -7px 341px;
+                }
+            }
+
+            &:nth-child(2) {
+                top: 42%;
+                left: 63%;
+                background-position: 197px 172px;
+
+                &:hover,
+                &:active,
+                &:focus,
+                &.SELECTED {
+                    background-position: 192px 341px;
+
+                }
+            }
+        }
+
+        .meter {
+            bottom: -5%;
+            left: 25%;
+            background: url('#{$sprite}spritesheet-progressionmeter-01.png');
+            background-position: 0 992px;
+            background-size: cover;
+            width: 50%;
+            height: 25%;
+        }
+    }
+}
+
+#what-did-you-do {
+    &.READY.OPEN {
+        img,
+        .meter {
+            position: absolute;
+
+            &.penguin {
+                top: 30%;
+                left: 9%;
+                width: 21%;
+            }
+
+            &.banner {
+                top: 3%;
+                left: 5%;
+                width: 46%;
+            }
+        }
+
+        ul.selectable > * {
+            display: inline-block;
+            position: absolute;
+            background: url('#{$sprite}spritesheet-guide-12-01.png');
+            background-size: 1750px 174px;
+            width: 339px;
+            height: 86px;
+
+            &:nth-child(1) {
+                top: 3%;
+                left: 53%;
+                background-position: -15px 0;
+
+                &:hover,
+                &:active,
+                &:focus,
+                &.HIGHLIGHTED {
+                    background-position: -15px 88px;
+                }
+            }
+
+            &:nth-child(2) {
+                top: 20%;
+                left: 53%;
+                background-position: 1385px 0;
+
+                &:hover,
+                &:active,
+                &:focus,
+                &.HIGHLIGHTED {
+                    background-position: 1385px 88px;
+
+                }
+            }
+
+            &:nth-child(3) {
+                top: 37%;
+                left: 53%;
+                background-position: 1034px 1px;
+
+                &:hover,
+                &:active,
+                &:focus,
+                &.HIGHLIGHTED {
+                    background-position: 1035px 88px;
+
+                }
+            }
+
+            &:nth-child(4) {
+                top: 54%;
+                left: 53%;
+                background-position: 683px 1px;
+
+                &:hover,
+                &:active,
+                &:focus,
+                &.HIGHLIGHTED {
+                    background-position: 684px 88px;
+
+                }
+            }
+
+            &:nth-child(5) {
+                top: 71%;
+                left: 53%;
+                background-position: 339px -2px;
+
+                &:hover,
+                &:active,
+                &:focus,
+                &.HIGHLIGHTED {
+                    background-position: 339px 85px;
+
+                }
+            }
+        }
+    }
+
+    .meter {
+        bottom: -5%;
+        left: 25%;
+        background: url('#{$sprite}spritesheet-progressionmeter-01.png');
+        background-position: 0 1114px;
+        background-size: cover;
+        width: 50%;
+        height: 25%;
+    }
+}
+
+#how-much-env {
+    &.READY.OPEN {
+        img,
+        .frame,
+        .sub-frame,
+        .meter {
+            position: absolute;
+
+            &.penguin {
+                top: 17%;
+                left: 0%;
+                width: 16%;
+            }
+
+            &.banner {
+                top: 8%;
+                left: 10%;
+                width: 36%;
+            }
+
+            &.text-environment {
+                top: 37%;
+                right: 14%;
+                width: 50%;
+            }
+
+            &.icon {
+                top: 52.5%;
+                left: 28.5%;
+                width: 15%;
+            }
+        }
+
+        .frame {
+            top: 34%;
+            left: 24%;
+            background: url('#{$frame}frame-13-grey.png');
+            background-size: 100% 100%;
+            width: 75%;
+            height: 46%;
+        }
+
+        .sub-frame {
+            top: 50%;
+            left: 26.75%;
+            background: url('#{$image}img-13-rectangle.png');
+            background-size: 100% 100%;
+            width: 70%;
+            height: 29%;
+        }
+
+        ul.selectable > * {
+            display: inline-block;
+            position: absolute;
+            animation-name: fadeIn;
+            animation-delay: 4s;
+            background: url('#{$sprite}spritesheet-frame13-polarbear.png');
+            background-size: 500px 260px;
+            width: 142px;
+            height: 128px;
+
+            &:nth-child(1) {
+                top: 52%;
+                left: 46%;
+                background-position: -12px 1px;
+
+                &:hover,
+                &:active,
+                &:focus,
+                &.SELECTED {
+                    background-position: -12px 129px;
+                }
+            }
+
+            &:nth-child(2) {
+                top: 52%;
+                left: 62%;
+                background-position: 320px 0;
+
+                &:hover,
+                &:active,
+                &:focus,
+                &.SELECTED {
+                    background-position: 320px 388px;
+
+                }
+            }
+
+            &:nth-child(3) {
+                top: 52%;
+                left: 78%;
+                background-position: 153px 2px;
+
+                &:hover,
+                &:active,
+                &:focus,
+                &.SELECTED {
+                    background-position: 153px 130px;
+
+                }
+            }
+        }
+
+        .meter {
+            bottom: -5%;
+            left: 25%;
+            background: url('#{$sprite}spritesheet-progressionmeter-01.png');
+            background-position: 0 1234px;
+            background-size: cover;
+            width: 50%;
+            height: 25%;
+        }
+    }
+}
+
+
+#how-much-species {
+    &.READY.OPEN {
+        img,
+        .frame,
+        .sub-frame,
+        .meter {
+            position: absolute;
+
+            &.penguin {
+                top: 17%;
+                left: 0%;
+                width: 16%;
+            }
+
+            &.banner {
+                top: 8%;
+                left: 10%;
+                width: 36%;
+            }
+
+            &.text-species {
+                top: 37%;
+                right: 14%;
+                width: 50%;
+            }
+
+            &.icon {
+                top: 52.5%;
+                left: 28.5%;
+                width: 15%;
+            }
+        }
+
+        .frame {
+            top: 34%;
+            left: 24%;
+            background: url('#{$frame}frame-13-grey.png');
+            background-size: 100% 100%;
+            width: 75%;
+            height: 46%;
+        }
+
+        .sub-frame {
+            top: 50%;
+            left: 26.75%;
+            background: url('#{$image}img-13-rectangle.png');
+            background-size: 100% 100%;
+            width: 70%;
+            height: 29%;
+        }
+
+        ul.selectable > * {
+            display: inline-block;
+            position: absolute;
+            animation-name: fadeIn;
+            animation-delay: 4s;
+            background: url('#{$sprite}spritesheet-frame13-polarbear.png');
+            background-size: 500px 260px;
+            width: 142px;
+            height: 128px;
+
+            &:nth-child(1) {
+                top: 52%;
+                left: 46%;
+                background-position: -12px 1px;
+
+                &:hover,
+                &:active,
+                &:focus,
+                &.SELECTED {
+                    background-position: -12px 129px;
+                }
+            }
+
+            &:nth-child(2) {
+                top: 52%;
+                left: 62%;
+                background-position: 320px 0;
+
+                &:hover,
+                &:active,
+                &:focus,
+                &.SELECTED {
+                    background-position: 320px 388px;
+
+                }
+            }
+
+            &:nth-child(3) {
+                top: 52%;
+                left: 78%;
+                background-position: 153px 2px;
+
+                &:hover,
+                &:active,
+                &:focus,
+                &.SELECTED {
+                    background-position: 153px 130px;
+
+                }
+            }
+        }
+
+        .meter {
+            bottom: -5%;
+            left: 25%;
+            background: url('#{$sprite}spritesheet-progressionmeter-01.png');
+            background-position: 0 1360px;
+            background-size: cover;
+            width: 50%;
+            height: 25%;
+        }
+    }
+}
+
+
+#how-much-water {
+    &.READY.OPEN {
+        img,
+        .frame,
+        .sub-frame,
+        .meter {
+            position: absolute;
+
+            &.penguin {
+                top: 17%;
+                left: 0%;
+                width: 16%;
+            }
+
+            &.banner {
+                top: 8%;
+                left: 10%;
+                width: 36%;
+            }
+
+            &.text-water {
+                top: 37%;
+                right: 14%;
+                width: 50%;
+            }
+
+            &.icon {
+                top: 52.5%;
+                left: 28.5%;
+                width: 15%;
+            }
+        }
+
+        .frame {
+            top: 34%;
+            left: 24%;
+            background: url('#{$frame}frame-13-grey.png');
+            background-size: 100% 100%;
+            width: 75%;
+            height: 46%;
+        }
+
+        .sub-frame {
+            top: 50%;
+            left: 26.75%;
+            background: url('#{$image}img-13-rectangle.png');
+            background-size: 100% 100%;
+            width: 70%;
+            height: 29%;
+        }
+
+        ul.selectable > * {
+            display: inline-block;
+            position: absolute;
+            animation-name: fadeIn;
+            animation-delay: 4s;
+            background: url('#{$sprite}spritesheet-frame13-polarbear.png');
+            background-size: 500px 260px;
+            width: 142px;
+            height: 128px;
+
+            &:nth-child(1) {
+                top: 52%;
+                left: 46%;
+                background-position: -12px 1px;
+
+                &:hover,
+                &:active,
+                &:focus,
+                &.SELECTED {
+                    background-position: -12px 129px;
+                }
+            }
+
+            &:nth-child(2) {
+                top: 52%;
+                left: 62%;
+                background-position: 320px 0;
+
+                &:hover,
+                &:active,
+                &:focus,
+                &.SELECTED {
+                    background-position: 320px 388px;
+
+                }
+            }
+
+            &:nth-child(3) {
+                top: 52%;
+                left: 78%;
+                background-position: 153px 2px;
+
+                &:hover,
+                &:active,
+                &:focus,
+                &.SELECTED {
+                    background-position: 153px 130px;
+
+                }
+            }
+        }
+
+        .meter {
+            bottom: -5%;
+            left: 25%;
+            background: url('#{$sprite}spritesheet-progressionmeter-01.png');
+            background-position: 0 1482px;
+            background-size: cover;
+            width: 50%;
+            height: 25%;
+        }
+    }
+}
+
+#drag-n-drop-interests {
+    &.READY.OPEN {
+        img,
+        .meter,
+        .frame {
+            position: absolute;
+
+            &.banner {
+                top: 2%;
+                left: 11%;
+                width: 80%;
+            }
+
+            &.penguin {
+                top: 0;
+                left: 0;
+                width: 18%;
+            }
+        }
+
+        .frame {
+            bottom: 12%;
+            left: 11%;
+            background: url('#{$frame}frame-11-grey-rectangle.png');
+            background-size: 100% 100%;
+            width: 45%;
+            height: 69%;
+        }
+
+        ul > * {
+            display: inline-block;
+            position: absolute;
+            background: url('#{$sprite}spritesheet-frame16-01.png');
+            background-size: 1015px 394px;
+            width: 13%;
+            height: 22%;
+
+            &:nth-child(1) {
+                top: 22%;
+                left: 13%;
+                background-position: -2px 118px;
+            }
+
+            &:nth-child(2) {
+                top: 22%;
+                left: 27%;
+                background-position: 887px 117px;
+            }
+
+            &:nth-child(3) {
+                top: 22%;
+                left: 41%;
+                background-position: 757px 115px;
+            }
+
+            &:nth-child(4) {
+                top: 44%;
+                left: 13%;
+                background-position: 634px 118px;
+            }
+
+            &:nth-child(5) {
+                top: 44%;
+                left: 27%;
+                background-position: 506px 118px;
+            }
+
+            &:nth-child(6) {
+                top: 44%;
+                left: 41%;
+                background-position: 380px 118px;
+            }
+
+            &:nth-child(7) {
+                top: 66%;
+                left: 19.5%;
+                background-position: 254px 118px;
+            }
+
+            &:nth-child(8) {
+                top: 66%;
+                left: 33.5%;
+                background-position: 126px 118px;
+            }
+        }
+
+        .draggable-list-item {
+            position: absolute;
+            top: 25%;
+            left: 25%;
+            width: 50%;
+            height: 50%;
+
+            &::before {
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                background: url('#{$sprite}spritesheet-frame16-01.png');
+                background-size: 1020px 395px;
+                width: 200%;
+                height: 200%;
+                content: '';
+            }
+
+            &.space {
+                &::before {
+                    background-position: -1px -11px;
+                }
+            }
+
+            &.animals {
+                &::before {
+                    background-position: 893px -12px;
+                }
+            }
+
+            &.recycling {
+                &::before {
+                    background-position: 765px -12px;
+                }
+            }
+
+            &.money {
+                &::before {
+                    background-position: 639px -11px;
+                }
+            }
+
+            &.printing {
+                &::before {
+                    background-position: 512px -11px;
+                }
+            }
+
+            &.coding {
+                &::before {
+                    background-position: 384px -12px;
+                }
+            }
+
+            &.art {
+                &::before {
+                    background-position: 257px -11px;
+                }
+            }
+
+            &.robotics {
+                &::before {
+                    background-position: 128px -12px;
+                }
+            }
+
+            &.DRAGGING {
+                z-index: 1;
+
+                &::before {
+                    background-size: 1000px 388px;
+                }
+
+                &.space {
+                    &::before {
+                        background-position: 0 247px;
+                    }
+                }
+
+                &.animals {
+                    &::before {
+                        background-position: 875px 247px;
+                    }
+                }
+
+                &.recycling {
+                    &::before {
+                        background-position: 749px 247px;
+                    }
+                }
+
+                &.money {
+                    &::before {
+                        background-position: 624px 247px;
+                    }
+                }
+
+                &.printing {
+                    &::before {
+                        background-position: 498px 246px;
+                    }
+                }
+
+                &.coding {
+                    &::before {
+                        background-position: 374px 246px;
+                    }
+                }
+
+                &.art {
+                    &::before {
+                        background-position: 250px 246px;
+                    }
+                }
+
+                &.robotics {
+                    &::before {
+                        background-position: 125px 248px;
+                    }
+                }
+            }
+
+            &.CORRECT {
+                &::before {
+                    background: url('#{$sprite}spritesheet-icons-frame16-01.png');
+                    background-size: 1000px 141px;
+                }
+
+                &.space {
+                    &::before {
+                        background-position: -3px -14px;
+                    }
+                }
+
+                &.animals {
+                    &::before {
+                        background-position: 869px -14px;
+                    }
+                }
+
+                &.recycling {
+                    &::before {
+                        background-position: 750px -14px;
+                    }
+                }
+
+                &.money {
+                    &::before {
+                        background-position: 624px -14px;
+                    }
+                }
+
+                &.printing {
+                    &::before {
+                        background-position: 495px -14px;
+                    }
+                }
+
+                &.coding {
+                    &::before {
+                        background-position: 371px -14px;
+                    }
+                }
+
+                &.art {
+                    &::before {
+                        background-position: 246px -14px;
+                    }
+                }
+
+                &.robotics {
+                    &::before {
+                        background-position: 121px -10px;
+                    }
+                }
+            }
+        }
+
+        div {
+            .dropzone {
+                position: absolute;
+                background: url('#{$sprite}spritesheet-right-numbers-01.png');
+                background-size: 1150px 130px;
+                width: 13%;
+                height: 22%;
+
+                &:nth-child(1) {
+                    top: 22%;
+                    left: 57%;
+                    background-position: -13px -6px;
+                }
+
+                &:nth-child(2) {
+                    top: 22%;
+                    left: 70%;
+                    background-position: 996px -6px;
+                }
+
+                &:nth-child(3) {
+                    top: 22%;
+                    left: 83%;
+                    background-position: 852px -6px;
+                }
+
+                &:nth-child(4) {
+                    top: 44%;
+                    left: 57%;
+                    background-position: 708px -6px;
+                }
+
+                &:nth-child(5) {
+                    top: 44%;
+                    left: 70%;
+                    background-position: 562px -6px;
+                }
+
+                &:nth-child(6) {
+                    top: 44%;
+                    left: 83%;
+                    background-position: 421px -6px;
+                }
+
+                &:nth-child(7) {
+                    top: 66%;
+                    left: 62%;
+                    background-position: 276px -6px;
+                }
+
+                &:nth-child(8) {
+                    top: 66%;
+                    left: 75%;
+                    background-position: 135px -6px;
+                }
+            }
+        }
+
+        .meter {
+            bottom: -5%;
+            left: 25%;
+            background: url('#{$sprite}spritesheet-progressionmeter-01.png');
+            background-position: 0 1606px;
+            background-size: cover;
+            width: 50%;
+            height: 25%;
+        }
+    }
+}
+
+#flip {
+    img {
+        position: absolute;
+        opacity: 0;
+    }
+
+    &.READY {
+        &.OPEN {
+            img {
+                opacity: 1;
+
+                &.frame {
+                    top: 2%;
+                    left: 6%;
+                    width: 88%;
+                }
+
+                &.banner {
+                    top: 29%;
+                    right: 12%;
+                    width: 48%;
+                }
+
+                &.confetti {
+                    width: 100%;
+                }
+            }
+
+            .flip-image {
+                position: absolute;
+                bottom: 8%;
+                left: 8%;
+                background: url('#{$sprite}earned-survey-flip.gif');
+                background-size: contain;
+                width: 35%;
+                height: 113%;
+            }
+
+            .frame,
+            .banner,
+            .confetti,
+            .flip-image {
+                animation-name: slideInDown;
+            }
+
+            &.COMPLETE {
+                .flip-image {
+                    background: url('#{$sprite}static-survey-flip.gif');
+                    background-size: contain;
+                }
+            }
+        }
+    }
+}
+
+#quit {
+    .frame {
+        position: absolute;
+        top: 2%;
+        left: 6%;
+        background: url('#{$frame}img-17-frame.png');
+        background-repeat: no-repeat;
+        background-size: 100%;
+        width: 88%;
+        height: 95%;
+        text-align: center;
+
+        h2,
+        h3 {
+            display: none;
+        }
+
+        &::after {
+            position: absolute;
+            top: 25%;
+            left: 15%;
+            background: url('#{$image}quit-screen-text-are-you-sure.png');
+            background-repeat: no-repeat;
+            background-size: 100%;
+            width: 70%;
+            height: 38%;
+            content: '';
+        }
+
+        .quit-yes {
+            position: absolute;
+            bottom: 5%;
+            left: 25%;
+            background: url('#{$image}yesnobuttons-01.png');
+            background-position: -15px -23px;
+            background-size: 200px 200px;
+            width: 21%;
+            height: 32%;
+
+            &:hover,
+            &:focus {
+                background: url('#{$image}yesnobuttons-03.png');
+                background-position: -15px -23px;
+                background-size: 200px 200px;
+            }
+        }
+
+        .quit-no {
+            position: absolute;
+            bottom: 5%;
+            left: 54%;
+            background: url('#{$image}yesnobuttons-02.png');
+            background-position: -11px -17px;
+            background-size: 200px 200px;
+            width: 21%;
+            height: 32%;
+
+            &:hover,
+            &:focus {
+                background: url('#{$image}yesnobuttons-04.png');
+                background-position: -11px -17px;
+                background-size: 200px 200px;
+            }
+        }
+    }
+}
